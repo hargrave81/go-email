@@ -17,15 +17,17 @@ func (m *Message) Send(smtpAddressPort string, auth smtp.Auth) error {
 	to := m.Header.To()
 	cc := m.Header.Cc()
 	bcc := m.Header.Bcc()
-	all := make([]string, 0, len(to)+len(cc)+len(bcc))
-
-	all = append(append(append(all, to...), cc...), bcc...)
-	for i := 0; i < len(all); i++ {
-		address, err := mail.ParseAddress(all[i])
-		if err != nil {
-			return err
+	allRecp := make([]string, 0, len(to)+len(cc)+len(bcc))
+	allRecp = append(append(append(allRecp, to...), cc...), bcc...)
+	var all []string
+	for i := 0; i < len(allRecp); i++ {
+		if allRecp[i] != "" {
+			address, err := mail.ParseAddress(allRecp[i])
+			if err != nil {
+				return err
+			}
+			all = append(all, address.Address)
 		}
-		all[i] = address.Address
 	}
 
 	if len(all) == 0 {
